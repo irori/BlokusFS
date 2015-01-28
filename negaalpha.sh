@@ -14,7 +14,13 @@ negaalpha() { # args: node depth alpha beta
 	local m
 	cd $1
 	for m in ????; do
-	    negaalpha $m $(($2 - 1)) $((- $4)) $((- $alpha))
+	    if [ $m = "????" ]; then
+		# no children - game end
+		read result < value # FIXME: use score instead of value
+		m="----"
+	    else
+		negaalpha $m $(($2 - 1)) $((- $4)) $((- $alpha))
+	    fi
 	    if [ $result -lt $best ]; then
 		best=$result
 		best_move=$m

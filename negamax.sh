@@ -13,7 +13,13 @@ negamax() { # args: node depth
 	local m
 	cd $1
 	for m in ????; do
-	    negamax $m $(($2 - 1))
+	    if [ $m = "????" ]; then
+		# no children - game end
+		read result < value # FIXME: use score instead of value
+		m="----"
+	    else
+		negamax $m $(($2 - 1))
+	    fi
 	    if [ $result -lt $best ]; then
 		best=$result
 		best_move=$m
