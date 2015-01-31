@@ -6,14 +6,21 @@ depth-1 := $(word $(DEPTH), 0 1 2 3 4 5 6 7 8 9)
 ifeq ($(MAKELEVEL), $(depth-1))
 
 negamax: $(DIR)
-	sort -n $(DIR)/*/value |head -n1
+	(sort -n $(DIR)/*/value || cat $(DIR)/value) |head -n1
 
 else
 
 subdirs := $(wildcard $(DIR)/????)
-tempfile := $(shell mktemp)
-
 .PHONY: negamax $(subdirs)
+
+ifeq ($(words $(subdirs)), 0)
+
+negamax:
+	cat $(DIR)/value
+
+else
+
+tempfile := $(shell mktemp)
 
 negamax: $(subdirs)
 ifeq ($(MAKELEVEL), 0)
@@ -28,6 +35,8 @@ ifeq ($(MAKELEVEL), 0)
 	$(MAKE) DIR=$@ -f ai/negamax.mk |sed 's/$$/	$(@F)/' >>$(tempfile)
 else
 	$(MAKE) DIR=$@ -f ai/negamax.mk >>$(tempfile)
+endif
+
 endif
 
 endif

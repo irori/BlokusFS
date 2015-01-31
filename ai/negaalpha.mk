@@ -22,6 +22,9 @@ subdirs := $(wildcard $(DIR)/????)
 
 negaalpha: $(subdirs)
 	rm $(tempfile)
+ifeq ($(words $(subdirs)), 0)
+	cp $(DIR)/value $(RESULT)
+endif
 ifeq ($(MAKELEVEL), 0)
 	awk '{print $$4}' $(RESULT)
 	rm $(RESULT)
