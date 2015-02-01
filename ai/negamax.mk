@@ -1,6 +1,13 @@
+# Negamax search
+# usage: make -f ai/negamax.mk DIR=blokusfs_dir [DEPTH=N]
+
 .SILENT:
 
-DEPTH = 2
+ifndef DIR
+$(error Please set DIR= parameter)
+endif
+
+DEPTH := 2
 depth-1 := $(word $(DEPTH), 0 1 2 3 4 5 6 7 8 9)
 
 ifeq ($(MAKELEVEL), $(depth-1))

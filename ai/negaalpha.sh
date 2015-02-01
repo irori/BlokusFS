@@ -1,8 +1,13 @@
 #!/bin/sh
-set -u
+
+# Negaalpha search
+
 set -e
 
-initial_depth=$2
+usage() {
+    echo "usage: $0 blokusfs_dir [depth]" 1>&2
+    exit 1
+}
 
 negaalpha() { # args: node depth alpha beta
     if [ $2 -eq 0 ]; then
@@ -12,7 +17,7 @@ negaalpha() { # args: node depth alpha beta
 	local alpha=$3
 	local best_move
 	local m
-	cd $1
+	cd -- $1
 	for m in ????; do
 	    if [ $m = "????" ]; then
 		# no children - game end
@@ -41,5 +46,18 @@ negaalpha() { # args: node depth alpha beta
     fi
 }
 
-negaalpha $1 $initial_depth 99999 -99999
+if [ "$1" != "" ]; then
+    dir="$1"
+else
+    [ "$DIR" = "" ] && usage
+    dir="$DIR"
+fi
+if [ ! -d "$dir" ]; then
+    echo "$0: $dir is not a directory" 1>&2
+    exit 1
+fi
+
+initial_depth=${2-2}
+
+negaalpha "$dir" $initial_depth 99999 -99999
 echo $result_move

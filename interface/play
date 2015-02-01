@@ -1,0 +1,89 @@
+#!/bin/sh
+set -e
+
+usage() {
+    echo "Usage: $0 [-v violet_prog] [-o orange_prog] blokusfs_root"
+    exit 1
+}
+
+is_dir() {
+    test -d $1
+}
+
+is_violet_turn() {
+    expr $turn % 2 = 0 >/dev/null
+}
+
+show_board() {
+    echo "  123456789ABCDE"
+    perl -ne 's/1+/\x1B[45m$&\x1B[0m/g; s/2+/\x1B[43m$&\x1B[0m/g; printf("%X %s", $., $_)' $dir/board
+    echo 'violet\norange' |paste - $dir/score $dir/piece |awk -F '\t' '{print $1, "(" $2 "):", $3}'
+}
+
+get_move() {
+    if is_violet_turn && [ "$violet_prog" != "" ]; then
+	echo "Violet is thinking..."
+	move=`DIR=$dir $violet_prog`
+        echo "violet($(($turn + 1))): $move"
+	return
+    fi
+    if ! is_violet_turn && [ "$orange_prog" != "" ]; then
+	echo "Orange is thinking..."
+	move=`DIR=$dir $orange_prog`
+	echo -n "orange($(($turn + 1))): $move"
+	return
+    fi
+    while true; do
+	echo
+	if is_violet_turn; then
+            echo -n "violet($(($turn + 1))): "
+	else
+	    echo -n "orange($(($turn + 1))): "
+	fi
+	read move
+	if [ -d "$dir/$move" ]; then
+	    return
+	fi
+	echo "$move: invalid move"
+    done
+}
+
+game_end() {
+    show_board $dir
+    read vscore <$dir/score
+    oscore=`tail -n1 $dir/score`
+    [ $vscore -gt $oscore ] && echo "Game End - Violet wins!"
+    [ $vscore -lt $oscore ] && echo "Game End - Orange wins!"
+    [ $vscore -eq $oscore ] && echo "Game End - Draw"
+}
+
+while getopts v:o: OPT; do
+    case $OPT in
+	v) violet_prog="$OPTARG" ;;
+	o) orange_prog="$OPTARG" ;;
+	\?) usage
+    esac
+done
+shift $((OPTIND - 1))
+
+if [ "$1" = "" ]; then usage; fi
+dir=$1
+if [ ! -d "$dir" ]; then
+    echo "$0: $dir is not a directory" 1>&2
+    exit 1
+fi
+
+turn=0
+while is_dir $dir/????; do
+    show_board $dir
+    get_move
+    if [ ! -d "$dir/$move" ]; then
+	echo "$move: invalid move"
+	exit 1
+    fi
+    dir="$dir/$move"
+    echo $dir
+    turn=$(($turn + 1))
+done
+
+game_end
