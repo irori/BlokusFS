@@ -17,7 +17,7 @@ public:
     int block_id() const { return m_ >> 11; }
     int direction() const { return m_ >> 8 & 0x7; }
     bool is_pass() const { return m_ == 0xffff; }
-    const char* fourcc() const;
+    std::string fourcc() const;
     bool operator<(const Move& rhs) const { return m_ < rhs.m_; }
     bool operator==(const Move& rhs) const { return m_ == rhs.m_; }
     bool operator!=(const Move& rhs) const { return m_ != rhs.m_; }

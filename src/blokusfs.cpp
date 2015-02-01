@@ -144,7 +144,7 @@ int blokus_readdir(const char *path,
     }
 
     for (int i = 0; i < nmove; i++)
-	filler(buf, movables[i].fourcc(), NULL, 0);
+	filler(buf, movables[i].fourcc().c_str(), NULL, 0);
 
     return 0;
 }
